@@ -73,3 +73,5 @@ SRC_URI[patch047.md5sum] = "8483153bad1a6f52cadc3bd9a8df7835"
 SRC_URI[patch047.sha256sum] = "c69248de7e78ba6b92f118fe1ef47bc86479d5040fe0b1f908ace1c9e3c67c4a"
 
 BBCLASSEXTEND = "nativesdk"
+
+TOOLCHAIN = "gcc"
