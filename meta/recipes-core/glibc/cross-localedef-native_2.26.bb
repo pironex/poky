@@ -17,12 +17,13 @@ inherit autotools
 
 FILESEXTRAPATHS =. "${FILE_DIRNAME}/${PN}:${FILE_DIRNAME}/glibc:"
 
-SRCBRANCH ?= "release/${PV}/master"
+#SRCBRANCH ?= "release/${PV}/master"
+SRCBRANCH ?= "master"
 GLIBC_GIT_URI ?= "git://sourceware.org/git/glibc.git"
 UPSTREAM_CHECK_GITTAGREGEX = "(?P<pver>\d+\.\d+(\.\d+)*)"
 
-SRCREV_glibc ?= "db0242e3023436757bbc7c488a779e6e3343db04"
-SRCREV_localedef ?= "29869b6dc11427c5bab839bdb155c85a7c644c71"
+SRCREV_glibc ?= "b2980e3c545294d71b3960ce74b6148e274d2488"
+SRCREV_localedef ?= "a06880c96320dc4fd84cacf7c126395fc48de64d"
 
 SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            git://github.com/kraj/localedef;branch=master;name=localedef;destsuffix=git/localedef \

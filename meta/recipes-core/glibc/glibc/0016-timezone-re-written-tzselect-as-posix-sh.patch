@@ -1,7 +1,7 @@
-From 2bed515b9f9f613ae0db9b9607d8fa60a4afca5b Mon Sep 17 00:00:00 2001
+From 341b2b3592118b01b6bca210617c630e49d6c67c Mon Sep 17 00:00:00 2001
 From: Khem Raj <raj.khem@gmail.com>
 Date: Wed, 18 Mar 2015 00:33:03 +0000
-Subject: [PATCH 16/26] timezone: re-written tzselect as posix sh
+Subject: [PATCH 16/27] timezone: re-written tzselect as posix sh
 
 To avoid the bash dependency.
 
@@ -15,7 +15,7 @@ Signed-off-by: Khem Raj <raj.khem@gmail.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/timezone/Makefile b/timezone/Makefile
-index dee7568..66a50be 100644
+index ab9d55b6be..b6ee36425d 100644
 --- a/timezone/Makefile
 +++ b/timezone/Makefile
 @@ -120,7 +120,7 @@ $(testdata)/XT%: testdata/XT%
@@ -28,7 +28,7 @@ index dee7568..66a50be 100644
  	    -e '/TZVERSION=/s|see_Makefile|"$(version)"|' \
  	    -e '/PKGVERSION=/s|=.*|="$(PKGVERSION)"|' \
 diff --git a/timezone/tzselect.ksh b/timezone/tzselect.ksh
-index 2c3b2f4..0c04a61 100755
+index 2c3b2f4438..0c04a61e31 100755
 --- a/timezone/tzselect.ksh
 +++ b/timezone/tzselect.ksh
 @@ -35,7 +35,7 @@ REPORT_BUGS_TO=tz@iana.org
@@ -41,5 +41,5 @@ index 2c3b2f4..0c04a61 100755
  # Output one argument as-is to standard output.
  # Safer than 'echo', which can mishandle '\' or leading '-'.
 -- 
-2.10.2
+2.12.2
 

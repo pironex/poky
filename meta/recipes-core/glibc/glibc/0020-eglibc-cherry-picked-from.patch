@@ -1,7 +1,7 @@
-From b2ed906ec864583b43379ef9ad2b5630c1232565 Mon Sep 17 00:00:00 2001
+From 5cd81813cf151ca3ad1a1c89c4d9be9bfb1e46d4 Mon Sep 17 00:00:00 2001
 From: Khem Raj <raj.khem@gmail.com>
 Date: Thu, 31 Dec 2015 15:10:33 -0800
-Subject: [PATCH 20/26] eglibc: cherry-picked from
+Subject: [PATCH 20/27] eglibc: cherry-picked from
 
 http://www.eglibc.org/archives/patches/msg00772.html
 
@@ -15,7 +15,7 @@ Signed-off-by: Khem Raj <raj.khem@gmail.com>
  1 file changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/resolv/res_libc.c b/resolv/res_libc.c
-index a4b376f..3256e12 100644
+index a4b376f15b..3256e12c56 100644
 --- a/resolv/res_libc.c
 +++ b/resolv/res_libc.c
 @@ -21,11 +21,13 @@
@@ -60,5 +60,5 @@ index a4b376f..3256e12 100644
  			if (resp->nscount > 0)
  				__res_iclose (resp, true);
 -- 
-2.10.2
+2.12.2
 
