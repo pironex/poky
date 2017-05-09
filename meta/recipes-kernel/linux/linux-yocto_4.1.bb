@@ -24,6 +24,8 @@ SRCREV_meta ?= "7140ddb86e4b01529185e6d4a606001ad152b8f3"
 SRC_URI = "git://git.yoctoproject.org/linux-yocto-4.1.git;name=machine;branch=${KBRANCH}; \
            git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-4.1;destsuffix=${KMETA}"
 
+SRC_URI += "file://0001-give-up-on-gcc-ilog2-constant-optimizations.patch"
+
 LINUX_VERSION ?= "4.1.38"
 
 PV = "${LINUX_VERSION}+git${SRCPV}"
