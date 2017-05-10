@@ -62,6 +62,12 @@ efi_hddimg_populate() {
         efi_populate $1
 }
 
+efi_bootfs_populate() {
+        bootfs_dir="${WORKDIR}/bootfs"
+        efi_populate $bootfs_dir
+        cp --dereference ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} $bootfs_dir/vmlinuz
+}
+
 python build_efi_cfg() {
     s = d.getVar("S")
     labels = d.getVar('LABELS')
