@@ -789,3 +789,39 @@ part /etc --source rootfs --ondisk mmcblk0 --fstype=ext4 --exclude-path bin/ --r
                 # 8 blocks is 4K (physical sector size)
                 self.assertEqual(dest_stat.st_blocks, 8)
             os.unlink(dest)
+
+    @only_for_arch(['i586', 'i686', 'x86_64'])
+    def test_generic_efi_grub_qemu(self):
+        """Test generic efi (grub-efi) image in qemu"""
+        config = 'IMAGE_FSTYPES = "wic"\nMACHINE_FEATURES_append = " efi"\n'\
+                 'EFI_PROVIDER = "grub-efi"\n'\
+                 'WKS_FILE = "test_generic_efi.wks.in"\n'
+
+        self.append_config(config)
+        self.assertEqual(0, bitbake('core-image-minimal ovmf').status)
+        self.remove_config(config)
+
+        with runqemu('core-image-minimal', ssh=False,
+                     runqemuparams='ovmf', image_fstype='wic') as qemu:
+            cmd = "grep sda. /proc/partitions  |wc -l"
+            status, output = qemu.run_serial(cmd)
+            self.assertEqual(1, status, 'Failed to run command "%s": %s' % (cmd, output))
+            self.assertEqual(output, '2')
+
+    @only_for_arch(['i586', 'i686', 'x86_64'])
+    def test_generic_efi_systemd_qemu(self):
+        """Test generic efi (systemd-boot) image in qemu"""
+        config = 'IMAGE_FSTYPES = "wic"\nMACHINE_FEATURES_append = " efi"\n'\
+                 'EFI_PROVIDER = "systemd-boot"\n'\
+                 'WKS_FILE = "test_generic_efi.wks.in"\n'
+
+        self.append_config(config)
+        self.assertEqual(0, bitbake('core-image-minimal ovmf').status)
+        self.remove_config(config)
+
+        with runqemu('core-image-minimal', ssh=False,
+                     runqemuparams='ovmf', image_fstype='wic') as qemu:
+            cmd = "grep sda. /proc/partitions  |wc -l"
+            status, output = qemu.run_serial(cmd)
+            self.assertEqual(1, status, 'Failed to run command "%s": %s' % (cmd, output))
+            self.assertEqual(output, '2')
