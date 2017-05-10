@@ -115,3 +115,40 @@ python do_rootfs_wicenv () {
 addtask do_rootfs_wicenv after do_image before do_image_wic
 do_rootfs_wicenv[vardeps] += "${WICVARS}"
 do_rootfs_wicenv[prefuncs] = 'set_image_size'
+
+# Set variables for efi_bootfs_populate
+GRUB_CFG ?= "${WORKDIR}/grub_wic.cfg"
+SYSTEMD_BOOT_CFG ?= "${WORKDIR}/loader_wic.conf"
+GRUB_GFXSERIAL ?= "1"
+LABELS_WIC ?= "boot install"
+LABELS ?= "${LABELS_WIC}"
+
+EFI_PROVIDER ?= "systemd-boot"
+EFI_CLASS = "${@bb.utils.contains("MACHINE_FEATURES", "efi", "${EFI_PROVIDER}", "", d)}"
+inherit ${EFI_CLASS}
+
+python do_populate_bootfs() {
+    def populate_bootfs(partuuid):
+        # remove bootfs dir as it may have files from previous build
+        bootfs = os.path.join(d.getVar("WORKDIR"), 'bootfs')
+        if os.path.exists(bootfs):
+            import shutil
+            shutil.rmtree(bootfs)
+
+        d.setVar("APPEND", "root=PARTUUID=%s" % partuuid)
+        bb.build.exec_func('build_efi_cfg', d)
+
+        bb.build.exec_func('efi_bootfs_populate', d)
+
+    if d.getVar('USING_WIC'):
+        # Generate parition UUID
+        from uuid import uuid4
+        partuuid = str(uuid4())
+        d.setVar("ROOTFS_PARTUUID", partuuid)
+
+        if d.getVar("EFI_CLASS"):
+            populate_bootfs(partuuid)
+}
+
+addtask do_populate_bootfs before do_image_wic
+do_populate_bootfs[depends] = "${MLPREFIX}${EFI_PROVIDER}:do_deploy virtual/kernel:do_deploy"
