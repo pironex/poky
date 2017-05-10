@@ -43,27 +43,6 @@ do_image_wic[depends] += "wic-tools:do_populate_sysroot"
 WKS_FILE_DEPENDS ??= ''
 DEPENDS += "${@ '${WKS_FILE_DEPENDS}' if d.getVar('USING_WIC') else '' }"
 
-python do_write_wks_template () {
-    """Write out expanded template contents to WKS_FULL_PATH."""
-    import re
-
-    template_body = d.getVar('_WKS_TEMPLATE')
-
-    # Remove any remnant variable references left behind by the expansion
-    # due to undefined variables
-    expand_var_regexp = re.compile(r"\${[^{}@\n\t :]+}")
-    while True:
-        new_body = re.sub(expand_var_regexp, '', template_body)
-        if new_body == template_body:
-            break
-        else:
-            template_body = new_body
-
-    wks_file = d.getVar('WKS_FULL_PATH')
-    with open(wks_file, 'w') as f:
-        f.write(template_body)
-}
-
 python () {
     if d.getVar('USING_WIC'):
         wks_file_u = d.getVar('WKS_FULL_PATH', False)
@@ -90,7 +69,6 @@ python () {
                 # file in process_wks_template as well, so just put it in
                 # a variable and let the metadata deal with the deps.
                 d.setVar('_WKS_TEMPLATE', body)
-                bb.build.addtask('do_write_wks_template', 'do_image_wic', None, d)
 }
 
 #
@@ -127,7 +105,11 @@ EFI_PROVIDER ?= "systemd-boot"
 EFI_CLASS = "${@bb.utils.contains("MACHINE_FEATURES", "efi", "${EFI_PROVIDER}", "", d)}"
 inherit ${EFI_CLASS}
 
-python do_populate_bootfs() {
+python do_prepare_wic_build() {
+    # Prepare required artifacts for the wic image build:
+    #  - Populate {WORKDIR}/bootfs directory with EFI content
+    #  - Write wks.in template into the .wks file
+
     def populate_bootfs(partuuid):
         # remove bootfs dir as it may have files from previous build
         bootfs = os.path.join(d.getVar("WORKDIR"), 'bootfs')
@@ -140,6 +122,23 @@ python do_populate_bootfs() {
 
         bb.build.exec_func('efi_bootfs_populate', d)
 
+    def write_wks_template(template_body, wks_file):
+        """Write out expanded template contents to WKS_FULL_PATH."""
+        import re
+
+        # Remove any remnant variable references left behind by the expansion
+        # due to undefined variables
+        expand_var_regexp = re.compile(r"\${[^{}@\n\t :]+}")
+        while True:
+            new_body = re.sub(expand_var_regexp, '', template_body)
+            if new_body == template_body:
+                break
+            else:
+                template_body = new_body
+
+        with open(wks_file, 'w') as f:
+            f.write(template_body)
+
     if d.getVar('USING_WIC'):
         # Generate parition UUID
         from uuid import uuid4
@@ -148,7 +147,11 @@ python do_populate_bootfs() {
 
         if d.getVar("EFI_CLASS"):
             populate_bootfs(partuuid)
+
+        template = d.getVar("_WKS_TEMPLATE")
+        if template:
+            write_wks_template(template, d.getVar('WKS_FULL_PATH'))
 }
 
-addtask do_populate_bootfs before do_image_wic
-do_populate_bootfs[depends] = "${MLPREFIX}${EFI_PROVIDER}:do_deploy virtual/kernel:do_deploy"
+addtask do_prepare_wic_build before do_image_wic
+do_prepare_wic_build[depends] = "${MLPREFIX}${EFI_PROVIDER}:do_deploy virtual/kernel:do_deploy"
