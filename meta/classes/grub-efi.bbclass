@@ -27,7 +27,8 @@ GRUB_TIMEOUT ?= "10"
 GRUB_OPTS ?= "serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1"
 
 EFIDIR = "/EFI/BOOT"
-GRUB_ROOT ?= "${ROOT}"
+ROOT ??= ""
+GRUB_ROOT ??= "${ROOT}"
 APPEND ?= ""
 
 # Need UUID utility code.
@@ -121,8 +122,6 @@ python build_efi_cfg() {
         cfgfile.write('timeout=50\n')
 
     root = d.getVar('GRUB_ROOT')
-    if not root:
-        bb.fatal('GRUB_ROOT not defined')
 
     if gfxserial == "1":
         btypes = [ [ " graphics console", "" ],
@@ -146,7 +145,8 @@ python build_efi_cfg() {
                 lb = "install-efi"
             cfgfile.write('linux /vmlinuz LABEL=%s' % (lb))
 
-            cfgfile.write(' %s' % replace_rootfs_uuid(d, root))
+            if root:
+                cfgfile.write(' %s' % replace_rootfs_uuid(d, root))
 
             append = localdata.getVar('APPEND')
             initrd = localdata.getVar('INITRD')
