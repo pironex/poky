@@ -69,6 +69,11 @@ python () {
                 # file in process_wks_template as well, so just put it in
                 # a variable and let the metadata deal with the deps.
                 d.setVar('_WKS_TEMPLATE', body)
+
+        bb.build.addtask('do_prepare_wic_build', 'do_image_wic', None, d)
+        if d.getVar('EFI_CLASS'):
+            d.appendVarFlag('do_prepare_wic_build', 'depends',
+                            '%s%s:do_deploy virtual/kernel:do_deploy' % (d.getVar('MLPREFIX'), d.getVar('EFI_CLASS')))
 }
 
 #
@@ -139,19 +144,15 @@ python do_prepare_wic_build() {
         with open(wks_file, 'w') as f:
             f.write(template_body)
 
-    if d.getVar('USING_WIC'):
-        # Generate parition UUID
-        from uuid import uuid4
-        partuuid = str(uuid4())
-        d.setVar("ROOTFS_PARTUUID", partuuid)
+    # Generate parition UUID
+    from uuid import uuid4
+    partuuid = str(uuid4())
+    d.setVar("ROOTFS_PARTUUID", partuuid)
 
-        if d.getVar("EFI_CLASS"):
-            populate_bootfs(partuuid)
+    if d.getVar("EFI_CLASS"):
+        populate_bootfs(partuuid)
 
-        template = d.getVar("_WKS_TEMPLATE")
-        if template:
-            write_wks_template(template, d.getVar('WKS_FULL_PATH'))
+    template = d.getVar("_WKS_TEMPLATE")
+    if template:
+        write_wks_template(template, d.getVar('WKS_FULL_PATH'))
 }
-
-addtask do_prepare_wic_build before do_image_wic
-do_prepare_wic_build[depends] = "${MLPREFIX}${EFI_PROVIDER}:do_deploy virtual/kernel:do_deploy"
